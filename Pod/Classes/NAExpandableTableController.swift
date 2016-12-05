@@ -53,6 +53,9 @@ open class NAExpandableTableController: NSObject, UITableViewDataSource, UITable
     /// Determines if multiple sections can be expanded at the same time. If set to `true`, then only one section can be expanded at a time. If a section is expanded and you try to expand another section, the first one will be collapsed.
     open var exclusiveExpand: Bool = false
     
+    /// Determines to user animation on expand/collapse or not
+    open var useAnimation: Bool = true
+    
     open weak var dataSource: NAExpandableTableViewDataSource?
     open weak var delegate: NAExpandableTableViewDelegate?
     
@@ -138,6 +141,9 @@ open class NAExpandableTableController: NSObject, UITableViewDataSource, UITable
     internal func expandSection(_ tableView: UITableView, section: Int) {
         expandDict[section] = true
         tableView.beginUpdates()
+        if !useAnimation {
+            UIView.setAnimationsEnabled(useAnimation)
+        }
         
         var indexPaths = [IndexPath]()
         if let rows = dataSource?.expandableTableView(tableView, numberOfRowsInSection: section) {
@@ -148,12 +154,18 @@ open class NAExpandableTableController: NSObject, UITableViewDataSource, UITable
         
         tableView.insertRows(at: indexPaths, with: .none)
         tableView.endUpdates()
+        if !useAnimation {
+            UIView.setAnimationsEnabled(!useAnimation)
+        }
         
         delegate?.expandableTableView?(tableView, didExpandSection: section, expanded: true)
     }
     
     internal func collapseSection(_ tableView: UITableView, section: Int) {
         expandDict[section] = false
+        if !useAnimation {
+            UIView.setAnimationsEnabled(useAnimation)
+        }
         tableView.beginUpdates()
         
         var indexPaths = [IndexPath]()
@@ -165,7 +177,9 @@ open class NAExpandableTableController: NSObject, UITableViewDataSource, UITable
         
         tableView.deleteRows(at: indexPaths, with: .none)
         tableView.endUpdates()
-        
+        if !useAnimation {
+            UIView.setAnimationsEnabled(!useAnimation)
+        }
         delegate?.expandableTableView?(tableView, didExpandSection: section, expanded: false)
     }
 }
